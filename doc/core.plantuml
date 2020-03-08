@@ -1,0 +1,83 @@
+@startuml core
+
+PCAPHandler *-- PluginHandler
+ProtocolStreamFactory *-- PCAPHandler
+
+class PCAPHandler{
+        __ Public Variables __
+        + Type PCAPType
+        + Handler *pcap.Handler
+        __ Private Variables __
+        + config PCAPConfig
+        __ Public Methods __
+        + Init(configPath string) error
+        + Work()
+        + Close() error
+        __ Private Methods __
+        + loadConfig(configPath string) error
+}
+
+note top of PCAPHandler
+    Public Methods:
+        pcapHandler := new PCAPHandler{} // Instantiate
+        pcapHandler.Init() // Initialize struct with path of configuration
+        pcapHandler.Work() // Start to capture network traffic
+        pcapHandler.Close() // Destory
+end note
+
+note bottom of PCAPHandler
+    Private Methods:
+        ph.loadConfig(configPath string) // Load configuration from file
+end note
+
+class PluginHandler{
+        __ Public Variables __
+        + ResolveStream func(net gopacket.Flow, transport gopacket.Flow, r io.Reader)
+	    + BPF string
+        + InternalPluginList map[string]PluginInterface
+        + ExternalPluginList map[string]ExternalPlugin
+        __ Private Variables __
+        + dir string
+        __ Public Methods __
+        + LoadInternalPluginList()
+        + LoadExternalPluginList()
+        + PrintPluginList()
+        + SetOption(pluginName string, pluginParams []string)
+        __ Private Methods __
+        + TODO
+}
+
+note top of PluginHandler
+    Public Methods:
+        pluginHandler := new PluginHandler{} // Instantiate
+        pluginHandler.LoadInternalPluginList() // Initialize struct with path of configuration
+        pluginHandler.LoadExternalPluginList() // Start to capture network traffic
+        pluginHandler.PrintPluginList() // Destory
+        pluginHandler.SetOption(pluginName string, pluginParams []string) // 
+end note
+
+note bottom of PluginHandler
+    Private Methods:
+        TODO
+end note
+
+class ProtocolStreamFactory{
+        __ Public Variables __
+        __ Private Variables __
+        + pcapHandler *PCAPHandler
+        __ Public Methods __
+        + New(net, transport gopacket.Flow) tcpassembly.Stream
+        __ Private Methods __
+}
+
+note top of ProtocolStreamFactory
+    Public Methods:
+        pcapHandler := new ProtocolStreamFactory{} // Instantiate
+        pcapHandler.New(net, transport gopacket.Flow) // New
+end note
+
+note bottom of ProtocolStreamFactory
+    Private Methods:
+        TODO
+end note
+@enduml

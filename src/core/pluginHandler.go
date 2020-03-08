@@ -1,23 +1,23 @@
 package core
 
 import (
-	"io/ioutil"
-	"plugin"
-	"io"
-	"path/filepath"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"path"
+	"path/filepath"
+	"plugin"
 
 	"github.com/google/gopacket"
 
-	phttp "github.com/40t/go-sniffer/plugSrc/http/build"
-
+	phttp "plugin/http/plugin"
 )
 
+// PluginHandler : Plugin handler to load internal or external traffic handler
 type PluginHandler struct {
 	// Public
-	ResolveStream func(net gopacket.Flow, transport gopacket.Flow, r io.Reader)
-	BPF string
+	ResolveStream      func(net gopacket.Flow, transport gopacket.Flow, r io.Reader)
+	BPF                string
 	InternalPluginList map[string]PluginInterface
 	ExternalPluginList map[string]ExternalPlugin
 
@@ -25,6 +25,7 @@ type PluginHandler struct {
 	dir string
 }
 
+// PluginInterface : A interface defined plugin
 type PluginInterface interface {
 	Version() string
 	SetFlag([]string)
@@ -32,6 +33,7 @@ type PluginInterface interface {
 	ResolveStream(net gopacket.Flow, transport gopacket.Flow, r io.Reader)
 }
 
+// ExternalPlugin : External plugin object
 type ExternalPlugin struct {
 	Name          string
 	Version       string
@@ -40,6 +42,7 @@ type ExternalPlugin struct {
 	ResolvePacket func(net gopacket.Flow, transport gopacket.Flow, r io.Reader)
 }
 
+// NewPluginHandler : Instantiate a new PluginHandler
 func NewPluginHandler() *PluginHandler {
 	var p PluginHandler
 	p.dir, _ = filepath.Abs("./plug/")
@@ -68,7 +71,7 @@ func (p *PluginHandler) LoadExternalPluginList() {
 		if fi.IsDir() || path.Ext(fi.Name()) != ".so" {
 			continue
 		}
-		plug, err := plugin.Open(p.dir+"/"+fi.Name())
+		plug, err := plugin.Open(p.dir + "/" + fi.Name())
 		if err != nil {
 			panic(err)
 		}
@@ -89,11 +92,11 @@ func (p *PluginHandler) LoadExternalPluginList() {
 		if err != nil {
 			panic(err)
 		}
-		p.ExternalPluginList[fi.Name()] = ExternalPlugin {
-			Name: fi.Name(),
-			Version: Version,
-			SetFlag: SetFlagFunc.(func([]string)),
-			BPFFilter: BPFFilterFunc.(func() string),
+		p.ExternalPluginList[fi.Name()] = ExternalPlugin{
+			Name:          fi.Name(),
+			Version:       Version,
+			SetFlag:       SetFlagFunc.(func([]string)),
+			BPFFilter:     BPFFilterFunc.(func() string),
 			ResolvePacket: ResolvePacketFunc.(func(net gopacket.Flow, transport gopacket.Flow, r io.Reader)),
 		}
 	}
@@ -102,30 +105,30 @@ func (p *PluginHandler) LoadExternalPluginList() {
 // PrintPluginList : Print Plugins that have been loaded
 func (p *PluginHandler) PrintPluginList() {
 	// Print Internal Plugins
-	for inPluginName, _ := range p.InternalPluginList {
+	for inPluginName := range p.InternalPluginList {
 		fmt.Printf("Internal plugin: %s\n", inPluginName)
 	}
 
 	fmt.Printf("-- --- --\n")
 
 	// Print External Plugin
-	for exPluginName, _ := range p.ExternalPluginList {
+	for exPluginName := range p.ExternalPluginList {
 		fmt.Printf("External plugin: %s\n", exPluginName)
 	}
 }
 
-// SetOption : Set options, like BPF, etc., to plugin
+// SetOption : Set options, like BPF, etc., to the plugin
 func (p *PluginHandler) SetOption(pluginName string, pluginParams []string) {
 	// Load Internal Plugin
 	if internalPlugin, ok := p.InternalPluginList[pluginName]; ok {
 		p.ResolveStream = internalPlugin.ResolveStream
 		internalPlugin.SetFlag(pluginParams)
-		p.BPF =  internalPlugin.BPFFilter()
+		p.BPF = internalPlugin.BPFFilter()
 		return
 	}
 
 	// Load External Plugin
-	externalPlugin, err := plugin.Open("./plug/"+ pluginName)
+	externalPlugin, err := plugin.Open("./plug/" + pluginName)
 	if err != nil {
 		panic(err)
 	}
@@ -143,5 +146,5 @@ func (p *PluginHandler) SetOption(pluginName string, pluginParams []string) {
 	}
 	p.ResolveStream = resolvePacket.(func(net gopacket.Flow, transport gopacket.Flow, r io.Reader))
 	setFlag.(func([]string))(pluginParams)
-	p.BPF = BPFFilter.(func()string)()
+	p.BPF = BPFFilter.(func() string)()
 }
