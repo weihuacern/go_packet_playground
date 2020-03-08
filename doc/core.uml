@@ -1,0 +1,28 @@
+@startuml
+class PCAPHandler{
+        __ Public Variables __
+        + Type PCAPType
+        + Handler *pcap.Handler
+        __ Private Variables __
+        + config PCAPConfig
+        __ Public Methods __
+        + Init(configPath string) error
+        + Work()
+        + Close() error
+        __ Private Methods __
+        + loadConfig(configPath string) error
+}
+
+note top of PCAPHandler
+    Public Methods:
+        pcapHandler := new PCAPHandler{} // Instantiate
+        pcapHandler.Init() // Initialize struct with path of configuration
+        pcapHandler.Work() // Start to capture network traffic
+        pcapHandler.Close() // Destory
+end note
+
+note bottom of PCAPHandler
+    Private Methods:
+        ph.loadConfig(configPath string) // Load configuration from file
+end note
+@enduml
