@@ -17,6 +17,7 @@ make help
 ## Dependancies
 
 ```
+sudo apt-get install libpcap-dev
 go get github.com/google/gopacket@v1.1.17
 ```
 

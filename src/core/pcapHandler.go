@@ -7,13 +7,17 @@ import (
 	pcap "github.com/google/gopacket/pcap"
 )
 
+// PCAPType : PCAP can be in two ways: online, offline
 type PCAPType int
 
 const (
+	// PCAPOnline : Online mode to listen one network interface
 	PCAPOnline PCAPType = iota
+	// PCAPOffline : Offline mode to load PCAP file directly
 	PCAPOffline
 )
 
+// PCAPConfig : Configuration of PCAPHandler
 type PCAPConfig struct {
 	Type int `json:"type"` // PCAPType, Online or Offline
 	// Online
@@ -24,10 +28,12 @@ type PCAPConfig struct {
 	Filter string `json:"filter"` // PCAP filter in Berkeley Packet Filter
 }
 
+// PCAPHandler : The Hanldler of PCAP
 type PCAPHandler struct {
 	// Public
 	Type    PCAPType
 	Handler *pcap.Handler
+	Plugin  *PluginHandler
 	// Private
 	config PCAPConfig
 }
